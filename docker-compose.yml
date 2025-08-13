@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8
+    container_name: db
+    environment:
+      MYSQL_ROOT_PASSWORD: "root"
+      MYSQL_DATABASE: "iot"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 5s
+      retries: 10
+
+
+  backend:
+    build: ./backend
+    container_name: backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: "db"
+      DB_USER: "root"
+      DB_PASSWORD: "root"
+      DB_NAME: "iot"
+      DB_PORT: "3306"
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  myapp:
+    build: ./myapp
+    container_name: myapp
+    ports:
+      - "8081:8081"
+    environment:
+      REACT_NATIVE_PACKAGER_HOSTNAME: "0.0.0.0"
+      CHOKIDAR_USEPOLLING: "1"
+    restart: unless-stopped
+
+
+volumes:
+  db_data:
