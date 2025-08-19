@@ -9,7 +9,6 @@ gh repo clone Jamesz4147/65114540754-ST
 - java sdk 17
 
 # Run with Docker
-
 ## Docker
 ```bash
 docker-compose build --no-cache
